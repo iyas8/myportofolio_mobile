@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
 class MyHomePage extends StatelessWidget {
-  MyHomePage({super.key});
+  const MyHomePage({super.key});
 
   final String npm = '2506593891';
   final String nama = 'Muhammad Ilhami Yasya';
   final String kelas = 'PBP D';
 
-  final List<ItemHomepage> items = [
-    ItemHomepage('Education', Icons.school),
-    ItemHomepage('Experience', Icons.work),
-    ItemHomepage('Profile', Icons.person),
+  final List<ItemHomepage> items = const [
+    ItemHomepage('Lihat Education', Icons.school, Colors.blue),
+    ItemHomepage('Tambah Item', Icons.add_circle, Colors.green),
+    ItemHomepage('Logout', Icons.logout, Colors.red),
   ];
 
   @override
@@ -19,10 +19,7 @@ class MyHomePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text(
           'MyPortfolio',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
@@ -35,8 +32,8 @@ class MyHomePage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 InfoCard(title: 'NPM', content: npm),
-                InfoCard(title: 'Nama', content: nama),
-                InfoCard(title: 'Kelas', content: kelas),
+                InfoCard(title: 'Name', content: nama),
+                InfoCard(title: 'Class', content: kelas),
               ],
             ),
             const SizedBox(height: 16.0),
@@ -79,11 +76,7 @@ class InfoCard extends StatelessWidget {
   final String title;
   final String content;
 
-  const InfoCard({
-    super.key,
-    required this.title,
-    required this.content,
-  });
+  const InfoCard({super.key, required this.title, required this.content});
 
   @override
   Widget build(BuildContext context) {
@@ -116,8 +109,9 @@ class InfoCard extends StatelessWidget {
 class ItemHomepage {
   final String name;
   final IconData icon;
+  final Color color;
 
-  ItemHomepage(this.name, this.icon);
+  const ItemHomepage(this.name, this.icon, this.color);
 }
 
 class ItemCard extends StatelessWidget {
@@ -128,7 +122,7 @@ class ItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Theme.of(context).colorScheme.secondary,
+      color: item.color,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: () {
@@ -146,11 +140,7 @@ class ItemCard extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  item.icon,
-                  color: Colors.white,
-                  size: 30.0,
-                ),
+                Icon(item.icon, color: Colors.white, size: 30.0),
                 const SizedBox(height: 6.0),
                 Text(
                   item.name,
