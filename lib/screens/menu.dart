@@ -1,4 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:myportofolio_mobile/screens/education_form.dart';
+import 'package:myportofolio_mobile/widgets/item_card.dart';
+import 'package:myportofolio_mobile/widgets/left_drawer.dart';
 
 class MyHomePage extends StatelessWidget {
   const MyHomePage({super.key});
@@ -9,7 +12,7 @@ class MyHomePage extends StatelessWidget {
 
   final List<ItemHomepage> items = const [
     ItemHomepage('Lihat Education', Icons.school, Colors.blue),
-    ItemHomepage('Tambah Item', Icons.add_circle, Colors.green),
+    ItemHomepage('Tambah Education', Icons.add_circle, Colors.green),
     ItemHomepage('Logout', Icons.logout, Colors.red),
   ];
 
@@ -22,6 +25,19 @@ class MyHomePage extends StatelessWidget {
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Theme.of(context).colorScheme.primary,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      drawer: LeftDrawer(
+        onHomeTap: () {
+          Navigator.pop(context);
+        },
+        onAddEducationTap: () {
+          Navigator.pop(context);
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const EducationFormPage()),
+          );
+        },
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -100,56 +116,6 @@ class InfoCard extends StatelessWidget {
               style: const TextStyle(fontSize: 13.0),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class ItemHomepage {
-  final String name;
-  final IconData icon;
-  final Color color;
-
-  const ItemHomepage(this.name, this.icon, this.color);
-}
-
-class ItemCard extends StatelessWidget {
-  final ItemHomepage item;
-
-  const ItemCard(this.item, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: item.color,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: () {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(
-                content: Text('Kamu telah menekan tombol ${item.name}!'),
-              ),
-            );
-        },
-        child: Container(
-          padding: const EdgeInsets.all(8),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(item.icon, color: Colors.white, size: 30.0),
-                const SizedBox(height: 6.0),
-                Text(
-                  item.name,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.white),
-                ),
-              ],
-            ),
-          ),
         ),
       ),
     );
