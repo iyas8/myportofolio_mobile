@@ -2,7 +2,7 @@
 
 ## Deskripsi Proyek
 
-Proyek ini adalah aplikasi portofolio pribadi sederhana yang dibuat menggunakan Flutter. Aplikasi menampilkan informasi NPM, nama, dan kelas pemilik portofolio dalam tiga kartu informasi. Terdapat juga tiga kartu aksi, yaitu Lihat Education, Tambah Item, dan Logout. Setiap kartu aksi memiliki warna berbeda dan menampilkan SnackBar ketika ditekan
+Proyek ini adalah aplikasi portofolio pribadi sederhana yang dibuat menggunakan Flutter. Aplikasi menampilkan informasi NPM, nama, dan kelas pemilik portofolio. Halaman utama juga menyediakan kartu aksi untuk bagian Education dan formulir Education serta Experience. Kedua formulir memvalidasi isian dan menampilkan ringkasan data melalui dialog. Data dari formulir belum disimpan ke database atau API
 
 ## Cara Menjalankan Proyek (Setup)
 
@@ -11,6 +11,24 @@ Proyek ini adalah aplikasi portofolio pribadi sederhana yang dibuat menggunakan 
 3. Instal semua dependensi dengan menjalankan: `flutter pub get`.
 4. Periksa kode dengan menjalankan: `flutter analyze`.
 5. Jalankan aplikasi dengan perintah: `flutter run`. Pilih perangkat atau emulator yang tersedia.
+
+---
+
+### Tugas 8
+
+1. `Navigator.push()` menambahkan halaman baru ke dalam stack dan digunakan saat kartu Tambah Experience ditekan, sehingga pengguna dapat kembali dengan tombol Back. `Navigator.pushReplacement()` mengganti halaman yang sedang dibuka, misalnya saat berpindah dari formulir Experience ke Education melalui drawer. Sementara itu, `Navigator.pop()` menutup drawer atau halaman aktif. Pada halaman formulir, opsi Home menutup drawer lalu kembali ke halaman utama
+
+2. `Scaffold` menjadi kerangka halaman, `AppBar` menampilkan judul, dan `Drawer` menyediakan navigasi yang sama pada halaman Home, Education, dan Experience. Warna utama diambil dari `Theme.of(context).colorScheme.primary`, sehingga AppBar dan header drawer menggunakan warna tema yang konsisten
+
+3. Formulir menggunakan `Column` agar input tersusun dari atas ke bawah. `Padding` memberi jarak antarfield, sedangkan `SingleChildScrollView` membuat seluruh input dan tombol Simpan tetap dapat dijangkau saat layar sempit atau keyboard tampil
+
+4. `GlobalKey<FormState>` digunakan untuk mengakses state dari Form. Setiap `validator` memeriksa input, lalu `validate()` menjalankan seluruh validasi saat tombol Simpan ditekan. Contohnya, judul yang kosong atau hanya berisi spasi akan ditolak. Memilih jenis keyboard saja tidak cukup karena keyboard hanya membantu cara memasukkan teks, bukan memastikan isian wajib sudah benar
+
+### AI Disclosure
+
+Tool yang digunakan: ChatGPT
+
+Konteks Penggunaan: Saya menggunakan ChatGPT untuk membantu menyusun rancangan awal halaman Experience Form, navigasi, validasi dan widget test
 
 ---
 
