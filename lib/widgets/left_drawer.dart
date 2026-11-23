@@ -3,11 +3,13 @@ import 'package:material_ui/material_ui.dart';
 class LeftDrawer extends StatelessWidget {
   final VoidCallback onHomeTap;
   final VoidCallback onAddEducationTap;
+  final VoidCallback onAddExperienceTap;
 
   const LeftDrawer({
     super.key,
     required this.onHomeTap,
     required this.onAddEducationTap,
+    required this.onAddExperienceTap,
   });
 
   @override
@@ -15,9 +17,11 @@ class LeftDrawer extends StatelessWidget {
     return Drawer(
       child: ListView(
         children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(color: Colors.indigo),
-            child: Align(
+          DrawerHeader(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            child: const Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 'MyPortfolio',
@@ -35,9 +39,14 @@ class LeftDrawer extends StatelessWidget {
             onTap: onHomeTap,
           ),
           ListTile(
-            leading: const Icon(Icons.add_circle_outline),
+            leading: const Icon(Icons.school_outlined),
             title: const Text('Add Education'),
             onTap: onAddEducationTap,
+          ),
+          ListTile(
+            leading: const Icon(Icons.work_outline),
+            title: const Text('Add Experience'),
+            onTap: onAddExperienceTap,
           ),
         ],
       ),

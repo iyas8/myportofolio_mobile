@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:myportofolio_mobile/screens/experience_form.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
 
 class EducationFormPage extends StatefulWidget {
@@ -25,7 +26,7 @@ class _EducationFormPageState extends State<EducationFormPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Center(child: Text('Education Form')),
-        backgroundColor: Colors.indigo,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
       ),
       drawer: LeftDrawer(
@@ -35,6 +36,13 @@ class _EducationFormPageState extends State<EducationFormPage> {
         },
         onAddEducationTap: () {
           Navigator.pop(context);
+        },
+        onAddExperienceTap: () {
+          Navigator.pop(context);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const ExperienceFormPage()),
+          );
         },
       ),
       body: Form(
@@ -186,7 +194,9 @@ class _EducationFormPageState extends State<EducationFormPage> {
                   padding: const EdgeInsets.all(8.0),
                   child: ElevatedButton(
                     style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all(Colors.indigo),
+                      backgroundColor: WidgetStateProperty.all(
+                        Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
