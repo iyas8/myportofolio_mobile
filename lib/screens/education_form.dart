@@ -1,6 +1,12 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:myportofolio_mobile/models/education.dart';
+import 'package:myportofolio_mobile/screens/education_list_screen.dart';
 import 'package:myportofolio_mobile/screens/experience_form.dart';
+import 'package:myportofolio_mobile/services/api_client.dart';
+import 'package:myportofolio_mobile/services/auth_state.dart';
+import 'package:myportofolio_mobile/widgets/auth_guard.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
+import 'package:provider/provider.dart';
 
 class EducationFormPage extends StatefulWidget {
   const EducationFormPage({super.key});
@@ -18,11 +24,127 @@ class _EducationFormPageState extends State<EducationFormPage> {
   String _endYear = '';
   String _description = '';
   bool _isActive = true;
+  bool _isSubmitting = false;
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    try {
+      final loggedIn = await ensureLoggedIn(context);
+      if (!mounted || !loggedIn) return;
+
+      final token = context.read<AuthState>().token;
+      if (token == null) return;
+
+      final education = Education(
+        school: _school.trim(),
+        degree: _degree.trim(),
+        startYear: _startYear.trim(),
+        endYear: _endYear.trim(),
+        description: _description.trim(),
+        isActive: _isActive,
+      );
+
+      final created = await context.read<ApiClient>().createEducation(
+        education,
+        token: token,
+      );
+      if (!mounted) return;
+
+      final activeStatus = created.isActive ? 'Ya' : 'Tidak';
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) {
+          return AlertDialog(
+            title: const Text('Education berhasil ditambahkan!'),
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Institusi: ${created.school}'),
+                  Text('Gelar / Jurusan: ${created.degree}'),
+                  Text('Tahun Mulai: ${created.startYear}'),
+                  Text('Tahun Selesai: ${created.endYear}'),
+                  Text('Deskripsi: ${created.description}'),
+                  Text('Masih menempuh pendidikan: $activeStatus'),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+
+      if (!mounted) return;
+      _formKey.currentState!.reset();
+      setState(() {
+        _school = '';
+        _degree = '';
+        _startYear = '';
+        _endYear = '';
+        _description = '';
+        _isActive = true;
+      });
+    } on ApiException catch (error) {
+      if (!mounted) return;
+      if (error.statusCode == 401) {
+        var logoutFailed = false;
+        try {
+          await context.read<AuthState>().logout();
+        } on Exception {
+          logoutFailed = true;
+        }
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              logoutFailed
+                  ? 'Sesi lokal diakhiri. Silakan login kembali.'
+                  : 'Sesi login berakhir. Silakan login kembali.',
+            ),
+          ),
+        );
+      } else if (error.statusCode == 403) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Akun ini tidak memiliki izin menambah Education.'),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal menyimpan Education (${error.statusCode}).'),
+          ),
+        );
+      }
+    } on Exception {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tidak dapat terhubung ke server Django.'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final status = _isActive ? 'Ya' : 'Tidak';
-
     return Scaffold(
       appBar: AppBar(
         title: const Center(child: Text('Education Form')),
@@ -32,7 +154,16 @@ class _EducationFormPageState extends State<EducationFormPage> {
       drawer: LeftDrawer(
         onHomeTap: () {
           Navigator.pop(context);
+          Navigator.popUntil(context, (route) => route.isFirst);
+        },
+        onEducationTap: () {
           Navigator.pop(context);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const EducationListScreen(),
+            ),
+          );
         },
         onAddEducationTap: () {
           Navigator.pop(context);
@@ -62,11 +193,7 @@ class _EducationFormPageState extends State<EducationFormPage> {
                       borderRadius: BorderRadius.circular(5.0),
                     ),
                   ),
-                  onChanged: (value) {
-                    setState(() {
-                      _school = value;
-                    });
-                  },
+                  onChanged: (value) => _school = value,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Nama institusi tidak boleh kosong!';
@@ -86,11 +213,7 @@ class _EducationFormPageState extends State<EducationFormPage> {
                       borderRadius: BorderRadius.circular(5.0),
                     ),
                   ),
-                  onChanged: (value) {
-                    setState(() {
-                      _degree = value;
-                    });
-                  },
+                  onChanged: (value) => _degree = value,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Gelar atau jurusan tidak boleh kosong!';
@@ -103,6 +226,7 @@ class _EducationFormPageState extends State<EducationFormPage> {
                 padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
                   maxLength: 4,
+                  keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     hintText: 'Contoh: 2025',
                     labelText: 'Tahun Mulai',
@@ -110,11 +234,7 @@ class _EducationFormPageState extends State<EducationFormPage> {
                       borderRadius: BorderRadius.circular(5.0),
                     ),
                   ),
-                  onChanged: (value) {
-                    setState(() {
-                      _startYear = value;
-                    });
-                  },
+                  onChanged: (value) => _startYear = value,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Tahun mulai tidak boleh kosong!';
@@ -134,11 +254,7 @@ class _EducationFormPageState extends State<EducationFormPage> {
                       borderRadius: BorderRadius.circular(5.0),
                     ),
                   ),
-                  onChanged: (value) {
-                    setState(() {
-                      _endYear = value;
-                    });
-                  },
+                  onChanged: (value) => _endYear = value,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Tahun selesai tidak boleh kosong!';
@@ -158,11 +274,7 @@ class _EducationFormPageState extends State<EducationFormPage> {
                       borderRadius: BorderRadius.circular(5.0),
                     ),
                   ),
-                  onChanged: (value) {
-                    setState(() {
-                      _description = value;
-                    });
-                  },
+                  onChanged: (value) => _description = value,
                 ),
               ),
               Padding(
@@ -180,11 +292,7 @@ class _EducationFormPageState extends State<EducationFormPage> {
                     DropdownMenuItem<bool>(value: false, child: Text('Tidak')),
                   ],
                   onChanged: (value) {
-                    if (value != null) {
-                      setState(() {
-                        _isActive = value;
-                      });
-                    }
+                    if (value != null) _isActive = value;
                   },
                 ),
               ),
@@ -193,58 +301,17 @@ class _EducationFormPageState extends State<EducationFormPage> {
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: ElevatedButton(
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all(
-                        Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        showDialog(
-                          context: context,
-                          builder: (dialogContext) {
-                            return AlertDialog(
-                              title: const Text('Data Education'),
-                              content: SingleChildScrollView(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text('Institusi: ${_school.trim()}'),
-                                    Text('Gelar / Jurusan: ${_degree.trim()}'),
-                                    Text('Tahun Mulai: ${_startYear.trim()}'),
-                                    Text('Tahun Selesai: ${_endYear.trim()}'),
-                                    Text('Deskripsi: ${_description.trim()}'),
-                                    Text('Masih menempuh pendidikan: $status'),
-                                  ],
-                                ),
-                              ),
-                              actions: [
-                                TextButton(
-                                  child: const Text('OK'),
-                                  onPressed: () {
-                                    Navigator.pop(dialogContext);
-                                    _formKey.currentState!.reset();
-                                    setState(() {
-                                      _school = '';
-                                      _degree = '';
-                                      _startYear = '';
-                                      _endYear = '';
-                                      _description = '';
-                                      _isActive = true;
-                                    });
-                                  },
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      }
-                    },
-                    child: const Text(
-                      'Save',
-                      style: TextStyle(color: Colors.white),
-                    ),
+                    onPressed: _isSubmitting ? null : _submit,
+                    child: _isSubmitting
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text(
+                            'Save',
+                            style: TextStyle(color: Colors.white),
+                          ),
                   ),
                 ),
               ),
