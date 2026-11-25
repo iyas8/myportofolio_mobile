@@ -1,5 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/screens/education_form.dart';
+import 'package:myportofolio_mobile/screens/education_list_screen.dart';
+import 'package:myportofolio_mobile/widgets/auth_guard.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
 
 class ExperienceFormPage extends StatefulWidget {
@@ -36,10 +38,21 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
       drawer: LeftDrawer(
         onHomeTap: () {
           Navigator.pop(context);
-          Navigator.pop(context);
+          Navigator.popUntil(context, (route) => route.isFirst);
         },
-        onAddEducationTap: () {
+        onEducationTap: () {
           Navigator.pop(context);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const EducationListScreen(),
+            ),
+          );
+        },
+        onAddEducationTap: () async {
+          Navigator.pop(context);
+          final loggedIn = await ensureLoggedIn(context);
+          if (!context.mounted || !loggedIn) return;
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const EducationFormPage()),
@@ -66,11 +79,7 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
                       borderRadius: BorderRadius.circular(5.0),
                     ),
                   ),
-                  onChanged: (value) {
-                    setState(() {
-                      _title = value;
-                    });
-                  },
+                  onChanged: (value) => _title = value,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Judul pengalaman tidak boleh kosong!';
@@ -96,11 +105,7 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
                     );
                   }).toList(),
                   onChanged: (value) {
-                    if (value != null) {
-                      setState(() {
-                        _category = value;
-                      });
-                    }
+                    if (value != null) _category = value;
                   },
                   validator: (value) {
                     if (value == null) {
@@ -121,11 +126,7 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
                       borderRadius: BorderRadius.circular(5.0),
                     ),
                   ),
-                  onChanged: (value) {
-                    setState(() {
-                      _description = value;
-                    });
-                  },
+                  onChanged: (value) => _description = value,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Deskripsi pengalaman tidak boleh kosong!';

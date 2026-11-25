@@ -1,6 +1,8 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/screens/education_form.dart';
+import 'package:myportofolio_mobile/screens/education_list_screen.dart';
 import 'package:myportofolio_mobile/screens/experience_form.dart';
+import 'package:myportofolio_mobile/widgets/auth_guard.dart';
 import 'package:myportofolio_mobile/widgets/item_card.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
 
@@ -33,8 +35,19 @@ class MyHomePage extends StatelessWidget {
         onHomeTap: () {
           Navigator.pop(context);
         },
-        onAddEducationTap: () {
+        onEducationTap: () {
           Navigator.pop(context);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const EducationListScreen(),
+            ),
+          );
+        },
+        onAddEducationTap: () async {
+          Navigator.pop(context);
+          final loggedIn = await ensureLoggedIn(context);
+          if (!context.mounted || !loggedIn) return;
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const EducationFormPage()),
